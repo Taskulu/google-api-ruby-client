@@ -741,7 +741,10 @@ module Google
     # @return [Proc]
     def client_error_handler
       Proc.new do |exception, tries|
-        raise exception if exception.kind_of?(ClientError)
+        if exception.kind_of?(ClientError)
+          next if exception.message.include? 'Rate limit exceeded'
+          raise exception
+        end
       end
     end
 
