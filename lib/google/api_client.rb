@@ -742,7 +742,9 @@ module Google
     def client_error_handler
       Proc.new do |exception, tries|
         if exception.kind_of?(ClientError)
-          next if exception.message.include? 'Rate limit exceeded'
+          # Retry "Rate limit exceeded" errors
+          next if exception.respond_to?(:result) && exception.result.try(:status) == 403
+
           raise exception
         end
       end
